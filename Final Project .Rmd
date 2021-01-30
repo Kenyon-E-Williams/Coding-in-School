@@ -1,0 +1,117 @@
+---
+title: 'Starting Minimum Wage and Employment'
+author: "Kenyon Williams,Rylan Wood, Lucas Perez"
+
+date: "12/5/19"
+output:
+  html_document: default
+  header-includes: \usepackage{color}
+fontsize: 12pt
+margin: 1in
+---
+
+```{r setup, echo=FALSE, message=F, warning=F}
+
+#==============================================================================
+#   This chunk will be used for every assignment
+#==============================================================================
+
+  # Clear the working space
+    rm(list = ls())
+
+  #Set working directory
+setwd("/Users/kwill/Desktop/Econ 42")
+#getwd()
+
+### Load the packages (all must have been installed)
+    library(doBy)
+    library(dplyr)
+    library(foreign)
+    library(ggplot2)
+    library(knitr)
+    library(lmtest)
+    library(readstata13)
+    library(sandwich)
+    library(stargazer)
+    library(AER)
+    library(gdata)
+    library(wooldridge)
+
+cse=function(reg) {
+rob=sqrt(diag(vcovHC(reg, type="HC1")))
+return(rob)
+}
+
+```
+??discrim
+```{r data, echo=FALSE, warning=FALSE, include=FALSE}
+data(discrim)
+#Getting Data from CSV file
+```
+
+```{r table, echo=FALSE, warning=FALSE, include=TRUE, comment=" "}
+#Creating Descriptive Stats for New Jersey
+
+stargazer(subset(discrim[c("wagest","emp","hrsopen","ldensity")], discrim$NJ==1),
+       type="text", digits=2,
+title="New Jersey Descriptive Stats")
+
+#Creating Descriptive Stats for Pennslyvania
+stargazer(subset(discrim[c("wagest","emp","hrsopen","ldensity")], discrim$NJ==0),
+       type="text", digits=2,
+title="Pennsylvania Descriptive Stats")
+```
+
+```{r graph, echo=FALSE, warning=FALSE, include=TRUE, comment=" "}
+#Creating Visual Representation of our Initial Data
+ggplot(discrim, aes(x=wagest, y=emp)) + geom_point(col="red") +
+labs(title = "Starting Wages vs Employment ", x = "Starting Wages", y = "Employment") +
+stat_smooth(method = "lm", col = "blue", se=TRUE)+
+coord_cartesian(xlim=c(4.5,5.6),ylim=c(0,40))
+```
+
+```{r regression analysis, echo=FALSE, warning=FALSE, include=TRUE, comment=" "}
+
+#Creating Regressions for factors that could effect starting wage based on state characteristics
+reg1=lm(emp~I(log(wagest)), data=discrim)
+reg2=lm(emp~I(log(wagest))+ldensity, data=discrim)
+reg3=lm(emp~I(log(wagest))+ldensity+I(log(income)), data=discrim)
+reg4=lm(emp~I(log(wagest))+ldensity+I(log(income))+BK+KFC+RR+NJ, data=discrim)
+reg5=lm(emp~I(log(wagest))+hrsopen+ldensity+I(log(income))+BK+KFC+RR+NJ+I(hrsopen*wagest), data=discrim)
+```
+
+```{r regression star gazer, echo=FALSE, warning=FALSE, include=TRUE, comment=" "}
+#Displaying the Descriptive Stats associated with our respective regressions
+stargazer(reg1,reg2,reg3,reg4,reg5,
+se=list(cse(reg1),cse(reg2),cse(reg3),cse(reg4),cse(reg5)),
+title="Employment Regression",type="text",df=FALSE,digits=3)
+
+
+```
+
+
+
+
+```{r testing, echo=FALSE, warning=FALSE, include=TRUE, comment=" "}
+#Linear Hypothesis Testing For Statistical Significance 
+lht(reg4,c("NJ=0"), white.adjust="hc1")
+lht(reg5,c("hrsopen=0"),white.adjust="hc1")
+lht(reg4,c("I(log(wagest))=0"),white.adjust="hc1")
+
+```
+
+
+&nbsp; 
+
+&nbsp; 
+&nbsp; 
+
+
+
+&nbsp;
+&nbsp; 
+&nbsp; 
+
+  
+  
+
