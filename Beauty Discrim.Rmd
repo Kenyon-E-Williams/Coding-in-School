@@ -1,0 +1,93 @@
+---
+title: 'Beauty & Labor Market'
+author: "Kenyon Williams"
+
+date: "11/21/19"
+output:
+  html_document: default
+  header-includes: \usepackage{color}
+fontsize: 12pt
+margin: 1in
+---
+
+```{r setup, echo=FALSE, message=F, warning=F}
+
+#==============================================================================
+#   This chunk will be used for every assignment
+#==============================================================================
+
+  # Clear the working space
+    rm(list = ls())
+
+  #Set working directory
+setwd("/Users/kwill/Desktop/Econ 42")
+#getwd()
+
+### Load the packages (all must have been installed)
+    library(doBy)
+    library(dplyr)
+    library(foreign)
+    library(ggplot2)
+    library(knitr)
+    library(lmtest)
+    library(readstata13)
+    library(sandwich)
+    library(stargazer)
+    library(AER)
+    library(gdata)
+
+cse=function(reg) {
+rob=sqrt(diag(vcovHC(reg, type="HC1")))
+return(rob)
+}
+
+```
+### INTERACTION TERMS
+
+```{r data, echo=FALSE, warning=FALSE, include=FALSE}
+Beauty=read.csv("beauty.csv",header=TRUE,sep=",")
+#Getting Data from CSV file
+```
+
+```{r regression, echo=FALSE, warning=FALSE, include=TRUE, comment=" "}
+reg1=lm(lwage~belavg+educ+exper+service+expersq, data=Beauty)
+reg2=lm(lwage~belavg+educ+exper+service+expersq+I(belavg*service),data=Beauty)
+reg3=lm(lwage~belavg+educ+exper+service+expersq+I(belavg*married),data=Beauty)
+
+stargazer(reg1,reg2,reg3,
+se=list(cse(reg1),cse(reg2),cse(reg3)),
+title="LOG WAGE VS FACTORS", type="text",df=FALSE,digits=3)
+#Descriptive Stats for Q2 
+```
+### RESPONSES
+
+### What is the estimated plainess penalty on hourly wages? Statisically significant?
+
+If a worker has below average looks, on average their wage will be 15.5% less than someone who has better looks, holding all other factors constant. This effect is statistically significant. 
+
+### What is the estimated plainess penatly for workers in a service industry? How about workers not working in the service industry?
+
+The estimated plainness penalty in the service industry is 17.7%. Meaning that on average with other factors being held constant, someone in the service industry that has below average looks earns 17.7% less than someone with better looks. Someone who has above average looks only faces a plainness penalty of earning 14.7% less who does not work in the service industry. 
+
+### Does the estimated plainess penalty vary with your choice of demographic variable? How?
+
+The estimated plainness penalty decreased by 0.115. Now the plainess penaly is only -12.1% in terms of its effect on wage. Meaning that someone who has below average looks and is also married will on average earn 12.1% less than their counterparts, holding everything else constant.
+ 
+
+
+
+
+
+
+  
+
+
+
+ 
+
+ 
+
+
+  
+  
+
